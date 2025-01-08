@@ -1,0 +1,10 @@
+const globalSymbol1 = Symbol.for("myGlobalSymbol");
+const globalSymbol2 = Symbol.for("myGlobalSymbol");
+const symbol1 = Symbol("myUniqueSymbol");
+const symbol2 = Symbol("myUniqueSymbol");
+console.log(globalSymbol1 === globalSymbol2);
+console.log(symbol1 === symbol2);
+console.log(globalSymbol1);
+console.log(globalSymbol2);
+console.log(symbol1);
+console.log(symbol2);
