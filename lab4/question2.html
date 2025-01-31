@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h3>WEATHER DETAILS</h3>
+    <div>
+        <input type="text" id="city-input" placeholder="Enter city name">
+        <button onclick="getWeather()">Search</button>
+    </div>
+    <div id="weather-container">
+        <p id="city">City: </p>
+        <p id="min-temp">Min Temp: </p>
+        <p id="max-temp">Max Temp: </p>
+        <p id="humidity">Humidity: </p>
+    </div>
+    <script>
+        const apiKey = '89f994f2fb4753b847b81d8175680fcd';
+        function getWeather() {
+            const city = document.getElementById('city-input').value.trim();
+            if (city === "") {
+                return;
+            }
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('city').textContent = `City: ${data.name}`;
+                    document.getElementById('min-temp').textContent = `Min Temp: ${data.main.temp_min}`;
+                    document.getElementById('max-temp').textContent = `Max Temp: ${data.main.temp_max}`;
+                    document.getElementById('humidity').textContent = `Humidity: ${data.main.humidity}`;
+                })
+        }
+    </script>
+</body>
+</html>

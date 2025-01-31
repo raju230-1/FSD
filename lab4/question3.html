@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Weather Forecast</h1>
+    <table id="weatherTable" border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temperature (°C)</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <canvas id="temperatureChart" width="400" height="200"></canvas>
+
+    <script>
+        async function getWeatherData(city) {
+            const apiKey = 'your_api_key'; 
+            const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&cnt=7&appid=${apiKey}`; 
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            
+            const weatherDetails = data.list.map(item => {
+                return {
+                    date: new Date(item.dt * 1000).toLocaleDateString(), 
+                    temperature: item.main.temp 
+                };
+            });
+
+            return weatherDetails;
+        }
+
+        
+        async function displayWeatherData(city) {
+            const weatherDetails = await getWeatherData(city);
+
+            const tableBody = document.getElementById('weatherTable').getElementsByTagName('tbody')[0];
+
+            weatherDetails.forEach(item => {
+                const row = tableBody.insertRow();
+                const cellDate = row.insertCell(0);
+                const cellTemp = row.insertCell(1);
+
+                cellDate.textContent = item.date;
+                cellTemp.textContent = item.temperature;
+            });
+        }
+
+        
+        async function plotBarChart(city) {
+            const weatherDetails = await getWeatherData(city);
+
+            const dates = weatherDetails.map(item => item.date);
+            const temperatures = weatherDetails.map(item => item.temperature);
+
+           
+            const ctx = document.getElementById('temperatureChart').getContext('2d');
+            
+          
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates,  
+                    datasets: [{
+                        label: 'Temperature (°C)',  
+                        data: temperatures,  
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',  
+                        borderColor: 'rgba(75, 192, 192, 1)', 
+                        borderWidth: 1 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date' 
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Temperature (°C)' 
+                            },
+                            beginAtZero: true 
+                        }
+                    }
+                }
+            });
+        }
+
+        // When the page is fully loaded, call the functions to display data and plot the chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const city = 'London';  // Change to your desired city
+            displayWeatherData(city);
+            plotBarChart(city);
+        });
+    </script>
+</body>
+</html>
