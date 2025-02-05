@@ -3,108 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Forecast</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Weather Data Table</title>
 </head>
 <body>
-    <h1>Weather Forecast</h1>
-    <table id="weatherTable" border="1">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temperature (°C)</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <canvas id="temperatureChart" width="400" height="200"></canvas>
+
+    <h2>Weather Data Table</h2>
+    <input type="text" id="cityInput" placeholder="Enter city name" />
+    <button onclick="fetchWeather()">Load Weather</button>
+    <p id="error"></p>
+
+    <div id="tableContainer"></div>
 
     <script>
-        async function getWeatherData(city) {
-            const apiKey = 'your_api_key'; 
-            const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&cnt=7&appid=${apiKey}`; 
-
-            const response = await fetch(url);
-            const data = await response.json();
-
-            
-            const weatherDetails = data.list.map(item => {
-                return {
-                    date: new Date(item.dt * 1000).toLocaleDateString(), 
-                    temperature: item.main.temp 
-                };
-            });
-
-            return weatherDetails;
-        }
-
-        
-        async function displayWeatherData(city) {
-            const weatherDetails = await getWeatherData(city);
-
-            const tableBody = document.getElementById('weatherTable').getElementsByTagName('tbody')[0];
-
-            weatherDetails.forEach(item => {
-                const row = tableBody.insertRow();
-                const cellDate = row.insertCell(0);
-                const cellTemp = row.insertCell(1);
-
-                cellDate.textContent = item.date;
-                cellTemp.textContent = item.temperature;
-            });
-        }
-
-        
-        async function plotBarChart(city) {
-            const weatherDetails = await getWeatherData(city);
-
-            const dates = weatherDetails.map(item => item.date);
-            const temperatures = weatherDetails.map(item => item.temperature);
-
-           
-            const ctx = document.getElementById('temperatureChart').getContext('2d');
-            
-          
-            const chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: dates,  
-                    datasets: [{
-                        label: 'Temperature (°C)',  
-                        data: temperatures,  
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',  
-                        borderColor: 'rgba(75, 192, 192, 1)', 
-                        borderWidth: 1 
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Date' 
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Temperature (°C)' 
-                            },
-                            beginAtZero: true 
-                        }
-                    }
+        async function fetchWeather() {
+            try {
+                const apiKey = '4816ac7e73570702ad36ef266f065dcc'; 
+                const city = document.getElementById('cityInput').value
+                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-            });
+
+                const data = await response.json();
+                displayWeatherTable(data);
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+                document.getElementById('error').textContent = 'Failed to load weather data. Please try again.';
+            }
         }
 
-        // When the page is fully loaded, call the functions to display data and plot the chart
-        document.addEventListener('DOMContentLoaded', function() {
-            const city = 'London';  // Change to your desired city
-            displayWeatherData(city);
-            plotBarChart(city);
-        });
+        function displayWeatherTable(data) {
+            document.getElementById('error').textContent = ''; 
+
+            let container = document.getElementById('tableContainer');
+            container.innerHTML = ''; 
+            const table = document.createElement('table');
+            table.border = '1';
+
+            const headerRow = table.insertRow();
+            ['Date', 'Temperature (°C)', 'City'].forEach(text => {
+                const th = document.createElement('th');
+                th.textContent = text;
+                headerRow.appendChild(th);
+            });
+
+            const row = table.insertRow();
+            const date = new Date().toLocaleDateString();
+            row.insertCell().textContent = date;
+            row.insertCell().textContent = `${data.main.temp} °C`;
+            row.insertCell().textContent = data.name;
+
+            container.appendChild(table);
+        }
     </script>
+
 </body>
 </html>
